@@ -397,39 +397,11 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .loading-screen .brand-mark{font-size:28px;}
 .spinner{width:22px;height:22px;border-radius:50%;border:2px solid var(--border-strong);border-top-color:var(--gold);animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-.gate-screen{
-  min-height:100vh; display:flex; align-items:center; justify-content:center;
-  padding:24px; background:var(--bg);
-}
-.gate-card{
-  width:100%; max-width:340px;
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:16px; padding:28px 24px; text-align:center;
-}
-.gate-sub{ font-size:13px; color:var(--text-dim); margin:10px 0 22px 0; line-height:1.5; }
-.gate-btn{
-  width:100%; padding:13px; border-radius:10px; border:none;
-  background:var(--gold); color:#1a1508; font-weight:700; font-size:15px; cursor:pointer;
-}
-.gate-btn:active{ opacity:0.85; }
-.gate-status{ margin-top:14px; font-size:12.5px; color:var(--text-dim); }
-.gate-error{ margin-top:14px; font-size:12.5px; color:#d9552a; }
 </style>
 </head>
 <body>
 
-<div id="signinScreen" class="gate-screen">
-  <div class="gate-card">
-    <div class="brand-mark" style="font-size:26px;">好旅伴</div>
-    <div class="gate-sub">用 Google 帳號登入，資料會存到共用的雲端硬碟</div>
-    <button type="button" id="googleSigninBtn" class="gate-btn">使用 Google 登入</button>
-    <div id="signinLoading" class="gate-status" style="display:none;">連接雲端硬碟中…</div>
-    <div id="signinError" class="gate-error" style="display:none;"></div>
-  </div>
-</div>
-
-<div class="loading-screen" id="loadingScreen" style="display:none;">
+<div class="loading-screen" id="loadingScreen">
   <div class="brand-mark">好旅伴</div>
   <div class="spinner"></div>
 </div>
@@ -792,41 +764,38 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 (function(){
 "use strict";
 
-/* ---------------- storage ----------------
-   All four keys live in ONE shared Google Drive file so Josh and Fiona
-   (or anyone the file is shared with) read/write the same data. See the
-   "Google Drive storage (shared)" block near the bottom of this script. */
+/* ---------------- storage ---------------- */
 const Store = {
   async getTrips(){
-    try{ return driveStoreCache.trips ? JSON.parse(driveStoreCache.trips) : []; }
+    try{ const r = await window.storage.get('trips', true); return r ? JSON.parse(r.value) : []; }
     catch(e){ return []; }
   },
   async setTrips(v){
-    try{ driveStoreCache.trips = JSON.stringify(v); await driveSaveAll(); return true; }
+    try{ return await window.storage.set('trips', JSON.stringify(v), true); }
     catch(e){ return null; }
   },
   async getHomeTodos(){
-    try{ return driveStoreCache.homeTodos ? JSON.parse(driveStoreCache.homeTodos) : []; }
+    try{ const r = await window.storage.get('homeTodos', false); return r ? JSON.parse(r.value) : []; }
     catch(e){ return []; }
   },
   async setHomeTodos(v){
-    try{ driveStoreCache.homeTodos = JSON.stringify(v); await driveSaveAll(); return true; }
+    try{ return await window.storage.set('homeTodos', JSON.stringify(v), false); }
     catch(e){ return null; }
   },
   async getPeople(){
-    try{ return driveStoreCache.people ? JSON.parse(driveStoreCache.people) : []; }
+    try{ const r = await window.storage.get('people', true); return r ? JSON.parse(r.value) : []; }
     catch(e){ return []; }
   },
   async setPeople(v){
-    try{ driveStoreCache.people = JSON.stringify(v); await driveSaveAll(); return true; }
+    try{ return await window.storage.set('people', JSON.stringify(v), true); }
     catch(e){ return null; }
   },
   async getAirlines(){
-    try{ return driveStoreCache.airlines ? JSON.parse(driveStoreCache.airlines) : []; }
+    try{ const r = await window.storage.get('airlines', true); return r ? JSON.parse(r.value) : []; }
     catch(e){ return []; }
   },
   async setAirlines(v){
-    try{ driveStoreCache.airlines = JSON.stringify(v); await driveSaveAll(); return true; }
+    try{ return await window.storage.set('airlines', JSON.stringify(v), true); }
     catch(e){ return null; }
   }
 };
@@ -2973,137 +2942,14 @@ async function init(){
   document.getElementById('loadingScreen').style.display = 'none';
 }
 
-function armSlowLoadHint(){
-  setTimeout(()=>{
-    const loadingScreen = document.getElementById('loadingScreen');
-    if(loadingScreen && loadingScreen.style.display !== 'none'){
-      loadingScreen.querySelector('.spinner').insertAdjacentHTML('afterend','<div style="font-size:11px;color:var(--text-faint);font-family:var(--mono);">載入時間有點長，可能是網路不穩，試試看重新整理頁面</div>');
-    }
-  }, 12000);
-}
-
-/* ---------------- Google Drive storage (shared) ----------------
-   Everyone who opens this app signs in with their own Google account, but
-   they all read/write the SAME Drive file (found by name). Share that file
-   with each other's Google account (normal Drive "Share" dialog, Editor
-   access) so co-editing actually works.
-   TODO Josh: fill in your OAuth Client ID from Google Cloud Console. You
-   can reuse the same OAuth client you made for Strength Ledger — just add
-   this app's URL as an extra "Authorized redirect URI" on it (the
-   "Authorized JavaScript origin" is already covered if it's the same
-   github.io account). Also add the broader Drive scope below to that
-   OAuth client's configured scopes, and add anyone who needs to sign in
-   (including Fiona) as a test user. */
-const GOOGLE_CLIENT_ID = "239888779674-h2m814mnnc19k0jgc0f50uv4ac1j8oli.apps.googleusercontent.com";
-const DRIVE_FILE_NAME = "haolvban-shared-data.json";
-const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
-const REDIRECT_URI = window.location.origin + window.location.pathname;
-
-let driveAccessToken = null;
-let driveFileId = null;
-let driveStoreCache = {};
-
-async function driveApiFetch(url, options){
-  options = options || {};
-  options.headers = Object.assign({}, options.headers, { "Authorization": "Bearer " + driveAccessToken });
-  const res = await fetch(url, options);
-  if(res.status === 401){ throw new Error("Google 登入已過期，請重新登入一次"); }
-  if(!res.ok && res.status !== 404){ throw new Error("雲端硬碟連線失敗（" + res.status + "）"); }
-  return res;
-}
-
-async function driveFindFileId(){
-  const q = encodeURIComponent("name='" + DRIVE_FILE_NAME + "' and trashed=false");
-  const res = await driveApiFetch("https://www.googleapis.com/drive/v3/files?q=" + q + "&fields=files(id,name)&spaces=drive");
-  const data = await res.json();
-  if(data.files && data.files.length){ return data.files[0].id; }
-  return null;
-}
-
-async function driveCreateFile(){
-  const res = await driveApiFetch("https://www.googleapis.com/drive/v3/files", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: DRIVE_FILE_NAME, mimeType: "application/json" })
-  });
-  const data = await res.json();
-  return data.id;
-}
-
-async function driveReadFile(fileId){
-  const res = await driveApiFetch("https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media");
-  const text = await res.text();
-  if(!text){ return {}; }
-  try{ return JSON.parse(text); }catch(e){ return {}; }
-}
-
-async function driveWriteFile(fileId, obj){
-  await driveApiFetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media", {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(obj)
-  });
-}
-
-async function driveSaveAll(){
-  if(!driveFileId) return null;
-  await driveWriteFile(driveFileId, driveStoreCache);
-  return true;
-}
-
-async function initDriveAndApp(){
-  const signinScreenEl = document.getElementById("signinScreen");
-  const googleBtn = document.getElementById("googleSigninBtn");
-  const loadingEl = document.getElementById("signinLoading");
-  const errEl = document.getElementById("signinError");
-  if(googleBtn) googleBtn.style.display = "none";
-  if(loadingEl) loadingEl.style.display = "block";
-  if(errEl) errEl.style.display = "none";
-  try{
-    driveFileId = await driveFindFileId();
-    if(!driveFileId){ driveFileId = await driveCreateFile(); }
-    driveStoreCache = await driveReadFile(driveFileId);
-
-    if(signinScreenEl) signinScreenEl.style.display = "none";
-    const loadingScreen = document.getElementById("loadingScreen");
-    if(loadingScreen) loadingScreen.style.display = "flex";
-    armSlowLoadHint();
-    await init();
-  }catch(err){
-    if(loadingEl) loadingEl.style.display = "none";
-    if(googleBtn) googleBtn.style.display = "block";
-    if(errEl){
-      errEl.style.display = "block";
-      errEl.textContent = err && err.message ? err.message : "連線失敗，請再試一次";
-    }
+setTimeout(()=>{
+  const loadingScreen = document.getElementById('loadingScreen');
+  if(loadingScreen && loadingScreen.style.display !== 'none'){
+    loadingScreen.querySelector('.spinner').insertAdjacentHTML('afterend','<div style="font-size:11px;color:var(--text-faint);font-family:var(--mono);">載入時間有點長，可能是網路不穩，試試看重新整理頁面</div>');
   }
-}
+}, 12000);
 
-function startGoogleSignin(){
-  const authUrl = "https://accounts.google.com/o/oauth2/v2/auth"
-    + "?client_id=" + encodeURIComponent(GOOGLE_CLIENT_ID)
-    + "&redirect_uri=" + encodeURIComponent(REDIRECT_URI)
-    + "&response_type=token"
-    + "&scope=" + encodeURIComponent(DRIVE_SCOPE)
-    + "&include_granted_scopes=true"
-    + "&prompt=select_account";
-  window.location.href = authUrl;
-}
-
-document.getElementById("googleSigninBtn").addEventListener("click", startGoogleSignin);
-
-// If we just came back from Google's redirect, the access token is in the URL fragment.
-(function checkAuthRedirect(){
-  const hash = window.location.hash || "";
-  if(hash.indexOf("access_token=") === -1) return;
-  const params = new URLSearchParams(hash.substring(1));
-  const token = params.get("access_token");
-  const error = params.get("error");
-  history.replaceState(null, "", window.location.pathname + window.location.search);
-  if(error || !token) return;
-  driveAccessToken = token;
-  initDriveAndApp();
-})();
+init();
 })();
 </script>
 </body>
