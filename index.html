@@ -50,7 +50,7 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .serif{font-family:var(--serif);}
 
 #app{max-width:1280px;margin:0 auto;padding:0 20px 80px;}
-.topbar{position:sticky;top:0;z-index:40;background:rgba(17,21,28,0.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+.topbar{position:static;background:rgba(17,21,28,0.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
 .topbar-inner{max-width:1280px;margin:0 auto;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
 .brand{display:flex;align-items:baseline;gap:10px;cursor:pointer;}
 .brand-mark{font-family:var(--serif);font-weight:700;font-style:italic;font-size:22px;color:var(--gold);letter-spacing:0.5px;}
@@ -111,7 +111,6 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .trip-list{display:flex;flex-direction:column;gap:10px;}
 .trip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;transition:border-color .15s;position:relative;}
 .trip-card:hover{border-color:var(--border-strong);}
-.trip-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--tc,var(--gold));border-radius:var(--radius) 0 0 var(--radius);}
 .trip-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 .trip-card-headline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0;}
 .trip-card-name{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--text);}
@@ -165,6 +164,12 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 /* ---------- overview tab ---------- */
 .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
 @media(max-width:760px){.stat-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){
+  #app{padding:0 8px 80px;}
+  .trip-card{padding:12px 10px;}
+  .trip-card-panel{padding:12px 8px;}
+  .topbar-inner{padding:14px 10px;}
+}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
 .stat-label{font-size:11px;color:var(--text-faint);font-family:var(--mono);letter-spacing:0.5px;margin-bottom:6px;}
 .stat-val{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--text);}
@@ -267,7 +272,7 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .pack-cat-exclude-check.checked{background:#1a1a1a;border-color:#000;color:#fff;}
 .pack-sub-row.excluded{background:#1c1c1c;border-radius:6px;}
 .pack-sub-row.excluded .pack-sub-rename-input{color:#8a8a8a;text-decoration:line-through;}
-#packCatManageDoneBtn:disabled{opacity:0.35;cursor:not-allowed;}
+.packCatManageDoneBtn:disabled{opacity:0.35;cursor:not-allowed;}
 .pack-sub-row{display:flex;align-items:center;gap:8px;padding:7px 4px;border-radius:6px;}
 .pack-sub-row:hover{background:var(--surface-3);}
 .pack-sub-rename-input{background:transparent;border:1px solid transparent;}
@@ -300,11 +305,21 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .pack-progress-label{font-family:var(--mono);font-size:12.5px;color:var(--text-dim);white-space:nowrap;}
 .pack-people-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
 @media(max-width:520px){.pack-people-grid{grid-template-columns:1fr;}}
+.pack-people-stack{display:flex;flex-direction:column;gap:12px;}
 .pack-person-col{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);padding:14px;min-width:0;overflow:hidden;}
-.pack-person-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border-strong);}
+.pack-person-col.collapsed{padding:10px 14px;}
+.pack-person-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border-strong);}
+.pack-person-col.collapsed .pack-person-head{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+.pack-person-head.clickable{cursor:pointer;}
+.pack-collapse-arrow{font-size:11px;color:var(--text-faint);width:12px;flex-shrink:0;}
+.pack-person-head-fill{flex:1 1 auto;}
+.pack-person-add{width:auto;padding:6px 12px;font-size:12px;line-height:1;background:rgba(212,162,76,0.16);border-color:rgba(212,162,76,0.4);color:var(--gold);font-weight:600;}
+.pack-person-add:hover{background:rgba(212,162,76,0.26);}
 .pack-person-edit{width:auto;padding:6px 12px;gap:4px;font-size:12px;}
 .pack-person-name{font-family:var(--serif);font-size:14.5px;font-weight:600;color:var(--text);}
 .pack-person-count{font-size:11px;color:var(--text-faint);font-family:var(--mono);}
+.pack-cat-group-title{font-size:11px;color:var(--text-faint);font-family:var(--mono);letter-spacing:0.5px;margin:12px 0 6px 0;}
+.pack-cat-group-title:first-child{margin-top:0;}
 .pack-item{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);}
 .pack-item:last-child{border-bottom:none;}
 .pack-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border-strong);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#1a1508;}
@@ -313,6 +328,12 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .pack-item.checked .pack-item-text{color:var(--text-faint);text-decoration:line-through;}
 .pack-item-cat{font-size:10px;color:var(--text-faint);margin-left:6px;font-family:var(--mono);}
 .pack-add-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.pack-staged-section{margin-top:16px;padding:12px 12px 4px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius);}
+.pack-staged-section .cat-manage-col-title{margin-bottom:10px;}
+.pack-dup-row{padding:12px 0;border-bottom:1px solid var(--border);}
+.pack-dup-row:last-child{border-bottom:none;}
+.pack-dup-text{font-size:13.5px;color:var(--text);line-height:1.5;margin-bottom:8px;}
+.pack-dup-toggle{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-dim);cursor:pointer;}
 .pack-add-row input{flex:1 1 100px;min-width:0;padding:8px 10px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);font-size:12.5px;}
 .pack-add-row select{flex:0 1 92px;min-width:70px;padding:8px;border-radius:8px;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);font-size:11.5px;}
 
@@ -383,10 +404,11 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 /* ---------- modal ---------- */
 .modal-overlay{position:fixed;inset:0;background:rgba(10,12,16,0.6);backdrop-filter:blur(3px);z-index:80;display:none;align-items:center;justify-content:center;padding:20px;}
 .modal-overlay.active{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border-strong);border-radius:14px;padding:24px;width:100%;max-width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.modal{background:var(--surface);border:1px solid var(--border-strong);border-radius:14px;padding:24px;width:100%;max-width:440px;max-height:82vh;overflow-y:auto;overscroll-behavior:contain;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
 .modal-title{display:flex;align-items:center;justify-content:space-between;font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:18px;}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
 .modal-actions-split{display:flex;justify-content:space-between;align-items:center;margin-top:6px;}
+.cat-manage-actions{margin-bottom:12px;}
 
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface-3);border:1px solid var(--border-strong);color:var(--text);padding:11px 20px;border-radius:99px;font-size:13px;z-index:100;opacity:0;pointer-events:none;transition:all .25s ease;box-shadow:0 8px 30px rgba(0,0,0,0.4);}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -397,11 +419,39 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .loading-screen .brand-mark{font-size:28px;}
 .spinner{width:22px;height:22px;border-radius:50%;border:2px solid var(--border-strong);border-top-color:var(--gold);animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
+
+.gate-screen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:24px; background:var(--bg);
+}
+.gate-card{
+  width:100%; max-width:340px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:16px; padding:28px 24px; text-align:center;
+}
+.gate-sub{ font-size:13px; color:var(--text-dim); margin:10px 0 22px 0; line-height:1.5; }
+.gate-btn{
+  width:100%; padding:13px; border-radius:10px; border:none;
+  background:var(--gold); color:#1a1508; font-weight:700; font-size:15px; cursor:pointer;
+}
+.gate-btn:active{ opacity:0.85; }
+.gate-status{ margin-top:14px; font-size:12.5px; color:var(--text-dim); }
+.gate-error{ margin-top:14px; font-size:12.5px; color:#d9552a; }
 </style>
 </head>
 <body>
 
-<div class="loading-screen" id="loadingScreen">
+<div id="signinScreen" class="gate-screen">
+  <div class="gate-card">
+    <div class="brand-mark" style="font-size:26px;">好旅伴</div>
+    <div class="gate-sub">用 Google 帳號登入，資料會存到共用的雲端硬碟</div>
+    <button type="button" id="googleSigninBtn" class="gate-btn">使用 Google 登入</button>
+    <div id="signinLoading" class="gate-status" style="display:none;">連接雲端硬碟中…</div>
+    <div id="signinError" class="gate-error" style="display:none;"></div>
+  </div>
+</div>
+
+<div class="loading-screen" id="loadingScreen" style="display:none;">
   <div class="brand-mark">好旅伴</div>
   <div class="spinner"></div>
 </div>
@@ -644,6 +694,12 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 <div class="modal-overlay" id="packCatManageModalOverlay">
   <div class="modal" style="max-width:540px;">
     <div class="modal-title"><span>編輯分類</span><button class="btn-icon" id="packCatManageModalClose">✕</button></div>
+    <div class="modal-actions-split cat-manage-actions">
+      <div class="packCatExcludeArea">
+        <button class="btn packCatExcludeModeBtn" type="button">不攜帶</button>
+      </div>
+      <button class="btn btn-primary packCatManageDoneBtn">儲存</button>
+    </div>
     <div class="cat-manage-split">
       <div class="cat-manage-col">
         <div class="cat-manage-col-title">大項目</div>
@@ -662,11 +718,11 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
         </div>
       </div>
     </div>
-    <div class="modal-actions-split">
-      <div id="packCatExcludeArea">
-        <button class="btn" id="packCatExcludeModeBtn" type="button">不攜帶</button>
+    <div class="modal-actions-split cat-manage-actions">
+      <div class="packCatExcludeArea">
+        <button class="btn packCatExcludeModeBtn" type="button">不攜帶</button>
       </div>
-      <button class="btn btn-primary" id="packCatManageDoneBtn">完成</button>
+      <button class="btn btn-primary packCatManageDoneBtn">儲存</button>
     </div>
   </div>
 </div>
@@ -707,14 +763,27 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
       </div>
       <button class="btn btn-primary" id="packAddItemStageBtn" type="button">新增</button>
     </div>
-    <div class="cat-manage-col-title" style="margin-top:14px;">待新增清單</div>
-    <div id="packAddItemStagedList"></div>
+    <div class="pack-staged-section">
+      <div class="cat-manage-col-title">待新增清單</div>
+      <div id="packAddItemStagedList"></div>
+    </div>
     <div class="modal-actions-split">
       <button class="btn" id="packAddItemCancel">取消</button>
       <button class="btn btn-primary" id="packAddItemSaveBtn" type="button">儲存</button>
     </div>
   </div>
 
+</div>
+
+<div class="modal-overlay" id="packDupConfirmModalOverlay">
+  <div class="modal" style="max-width:460px;">
+    <div class="modal-title"><span>重複項目確認</span><button class="btn-icon" id="packDupConfirmClose">✕</button></div>
+    <div id="packDupConfirmList"></div>
+    <div class="modal-actions-split">
+      <button class="btn" id="packDupConfirmCancel">取消</button>
+      <button class="btn btn-primary" id="packDupConfirmOkBtn" type="button">確認新增</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal-overlay" id="packPersonManageModalOverlay">
@@ -764,38 +833,41 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 (function(){
 "use strict";
 
-/* ---------------- storage ---------------- */
+/* ---------------- storage ----------------
+   All four keys live in ONE shared Google Drive file so Josh and Fiona
+   (or anyone the file is shared with) read/write the same data. See the
+   "Google Drive storage (shared)" block near the bottom of this script. */
 const Store = {
   async getTrips(){
-    try{ const r = await window.storage.get('trips', true); return r ? JSON.parse(r.value) : []; }
+    try{ return driveStoreCache.trips ? JSON.parse(driveStoreCache.trips) : []; }
     catch(e){ return []; }
   },
   async setTrips(v){
-    try{ return await window.storage.set('trips', JSON.stringify(v), true); }
+    try{ driveStoreCache.trips = JSON.stringify(v); await driveSaveAll(); return true; }
     catch(e){ return null; }
   },
   async getHomeTodos(){
-    try{ const r = await window.storage.get('homeTodos', false); return r ? JSON.parse(r.value) : []; }
+    try{ return driveStoreCache.homeTodos ? JSON.parse(driveStoreCache.homeTodos) : []; }
     catch(e){ return []; }
   },
   async setHomeTodos(v){
-    try{ return await window.storage.set('homeTodos', JSON.stringify(v), false); }
+    try{ driveStoreCache.homeTodos = JSON.stringify(v); await driveSaveAll(); return true; }
     catch(e){ return null; }
   },
   async getPeople(){
-    try{ const r = await window.storage.get('people', true); return r ? JSON.parse(r.value) : []; }
+    try{ return driveStoreCache.people ? JSON.parse(driveStoreCache.people) : []; }
     catch(e){ return []; }
   },
   async setPeople(v){
-    try{ return await window.storage.set('people', JSON.stringify(v), true); }
+    try{ driveStoreCache.people = JSON.stringify(v); await driveSaveAll(); return true; }
     catch(e){ return null; }
   },
   async getAirlines(){
-    try{ const r = await window.storage.get('airlines', true); return r ? JSON.parse(r.value) : []; }
+    try{ return driveStoreCache.airlines ? JSON.parse(driveStoreCache.airlines) : []; }
     catch(e){ return []; }
   },
   async setAirlines(v){
-    try{ return await window.storage.set('airlines', JSON.stringify(v), true); }
+    try{ driveStoreCache.airlines = JSON.stringify(v); await driveSaveAll(); return true; }
     catch(e){ return null; }
   }
 };
@@ -1200,7 +1272,10 @@ function renderHomeTodos(){
   el.querySelectorAll('[data-toggle-home-todo]').forEach(chk=>{
     chk.addEventListener('click', async ()=>{
       const it = state.homeTodos.find(x=>x.id===chk.dataset.toggleHomeTodo);
-      if(it) it.checked = !it.checked;
+      if(!it) return;
+      it.checked = !it.checked;
+      chk.classList.toggle('checked', it.checked);
+      chk.textContent = it.checked ? '✓' : '';
       await Store.setHomeTodos(state.homeTodos);
       renderHomeTodos();
     });
@@ -1558,23 +1633,58 @@ function flightsHtml(t){
 }
 
 /* ---------- packing tab ---------- */
-function packPersonColHtml(person, items, isReadonly, scopeKey){
+let packPersonExpanded = {}; // key: tripId+'::'+person -> bool (default false = collapsed)
+function isPackExpanded(tripId, person){
+  return !!packPersonExpanded[tripId+'::'+person];
+}
+function togglePackExpanded(tripId, person){
+  const k = tripId+'::'+person;
+  packPersonExpanded[k] = !packPersonExpanded[k];
+  renderTripList();
+}
+function groupPackItemsByCat(items){
+  const order = [];
+  const map = {};
+  items.forEach(item=>{
+    const key = item.catName || '';
+    if(!(key in map)){ map[key] = []; order.push(key); }
+    map[key].push(item);
+  });
+  return order.map(key=>({ catName:key, items:map[key] }));
+}
+function packPersonColHtml(t, person, items, isReadonly, scopeKey, expanded, collapsible){
   scopeKey = scopeKey || person;
   const done = items.filter(i=>i.checked).length;
-  let html = '<div class="pack-person-col">';
-  html += '<div class="pack-person-head"><span class="pack-person-name">'+escapeHtml(person)+'</span>' +
-    (isReadonly ? '<span class="pack-person-count">'+done+'/'+items.length+'</span>' : '<button class="btn-icon btn-sm pack-person-edit" data-manage-person="'+escapeHtml(scopeKey)+'">✎ 編輯</button>') +
-    '</div>';
-  if(!items.length){
-    html += '<div class="empty-note">還沒有項目</div>';
-  } else {
-    items.forEach(item=>{
-      html += '<div class="pack-item'+(item.checked?' checked':'')+'" data-item="'+item.id+'">' +
-        '<div class="pack-check'+(item.checked?' checked':'')+'" data-toggle-pack="'+item.id+'">'+(item.checked?'✓':'')+'</div>' +
-        '<div class="pack-item-text">'+escapeHtml(item.text)+(item.qty>1?' × '+item.qty:'')+(item.catName?'<span class="pack-item-cat">'+escapeHtml(item.catName)+'</span>':'')+'</div>' +
-        '<button class="btn-icon btn-sm" data-del-pack="'+item.id+'">✕</button>' +
-      '</div>';
-    });
+  const collapsed = collapsible && !expanded;
+  let html = '<div class="pack-person-col'+(collapsed?' collapsed':'')+'">';
+  html += '<div class="pack-person-head'+(collapsible?' clickable':'')+'"'+(collapsible?' data-toggle-person="'+escapeHtml(scopeKey)+'"':'')+'>';
+  if(collapsible){ html += '<span class="pack-collapse-arrow">'+(expanded?'▾':'▸')+'</span>'; }
+  html += '<span class="pack-person-name">'+escapeHtml(person)+'</span>' +
+    '<span class="pack-person-count">'+done+'/'+items.length+'</span>' +
+    '<span class="pack-person-head-fill"></span>';
+  if(!isReadonly){
+    html += '<button class="btn-icon btn-sm pack-person-add" data-add-person-item="'+escapeHtml(scopeKey)+'" title="新增項目">新增</button>';
+  }
+  if(!isReadonly && (!collapsible || expanded)){
+    html += '<button class="btn-icon btn-sm pack-person-edit" data-manage-person="'+escapeHtml(scopeKey)+'">✎ 編輯</button>';
+  }
+  html += '</div>';
+  if(!collapsed){
+    if(!items.length){
+      html += '<div class="empty-note">還沒有項目</div>';
+    } else {
+      const groups = groupPackItemsByCat(items);
+      groups.forEach(g=>{
+        if(g.catName){ html += '<div class="pack-cat-group-title">大項目（'+escapeHtml(g.catName)+'）</div>'; }
+        g.items.forEach(item=>{
+          html += '<div class="pack-item'+(item.checked?' checked':'')+'" data-item="'+item.id+'">' +
+            '<div class="pack-check'+(item.checked?' checked':'')+'" data-toggle-pack="'+item.id+'">'+(item.checked?'✓':'')+'</div>' +
+            '<div class="pack-item-text">'+escapeHtml(item.text)+(item.qty>1?' × '+item.qty:'')+'</div>' +
+            '<button class="btn-icon btn-sm" data-del-pack="'+item.id+'">✕</button>' +
+          '</div>';
+        });
+      });
+    }
   }
   html += '</div>';
   return html;
@@ -1593,19 +1703,22 @@ function packingHtml(t){
   const pct = total ? Math.round(done/total*100) : 0;
   let html = '<div class="pack-progress"><div class="pack-bar"><div class="pack-bar-fill" style="width:'+pct+'%;"></div></div>' +
     '<div class="pack-progress-label">'+done+' / '+total+' 已打包</div></div>';
-  html += '<button class="btn btn-primary" id="btnPackAddItemTop" style="width:100%;margin-bottom:14px;">+ 新增項目</button>';
-  html += '<div class="pack-people-grid">';
+
+  const allExpanded = owners.length>0 && owners.every(p=>isPackExpanded(t.id, p));
+  html += '<div class="'+(allExpanded ? 'pack-people-grid' : 'pack-people-stack')+'">';
   owners.forEach(person=>{
     const items = allItems.filter(i=>i.owner===person);
-    html += packPersonColHtml(person, items, false);
+    html += packPersonColHtml(t, person, items, false, person, isPackExpanded(t.id, person), true);
   });
+  html += '</div>';
+
   const shared = allItems.filter(i=>i.owner==='__all__');
   if(shared.length){
-    html += packPersonColHtml('全部', shared, true);
+    html += packPersonColHtml(t, '全部', shared, true, '__all__', true, false);
   }
   const unassigned = allItems.filter(i=>!i.owner || (!owners.includes(i.owner) && i.owner!=='__all__'));
   if(unassigned.length){
-    html += packPersonColHtml('未分配', unassigned, false, '__unassigned__');
+    html += packPersonColHtml(t, '未分配', unassigned, false, '__unassigned__', true, false);
   }
   html += '</div>';
   html += '<button class="btn btn-sm btn-primary" id="btnEditPackCat" style="margin-top:14px;width:100%;">編輯分類</button>';
@@ -1625,17 +1738,21 @@ function qtyOptionsHtml(selected){
   return html;
 }
 function renderPackCatExcludeArea(){
-  const area = document.getElementById('packCatExcludeArea');
-  const doneBtn = document.getElementById('packCatManageDoneBtn');
+  const areas = document.querySelectorAll('.packCatExcludeArea');
+  const doneBtns = document.querySelectorAll('.packCatManageDoneBtn');
   if(packCatExcludeMode){
-    area.innerHTML = '<button class="btn btn-danger" id="packCatExcludeCancelBtn" type="button">取消</button> <button class="btn btn-primary" id="packCatExcludeSaveBtn" type="button">儲存</button>';
-    doneBtn.disabled = true;
-    document.getElementById('packCatExcludeCancelBtn').addEventListener('click', cancelPackCatExcludeMode);
-    document.getElementById('packCatExcludeSaveBtn').addEventListener('click', savePackCatExcludeMode);
+    areas.forEach(area=>{
+      area.innerHTML = '<button class="btn btn-danger packCatExcludeCancelBtn" type="button">取消</button> <button class="btn btn-primary packCatExcludeSaveBtn" type="button">儲存</button>';
+    });
+    doneBtns.forEach(btn=>{ btn.disabled = true; });
+    document.querySelectorAll('.packCatExcludeCancelBtn').forEach(btn=>btn.addEventListener('click', cancelPackCatExcludeMode));
+    document.querySelectorAll('.packCatExcludeSaveBtn').forEach(btn=>btn.addEventListener('click', savePackCatExcludeMode));
   } else {
-    area.innerHTML = '<button class="btn" id="packCatExcludeModeBtn" type="button">不攜帶</button>';
-    doneBtn.disabled = false;
-    document.getElementById('packCatExcludeModeBtn').addEventListener('click', enterPackCatExcludeMode);
+    areas.forEach(area=>{
+      area.innerHTML = '<button class="btn packCatExcludeModeBtn" type="button">不攜帶</button>';
+    });
+    doneBtns.forEach(btn=>{ btn.disabled = false; });
+    document.querySelectorAll('.packCatExcludeModeBtn').forEach(btn=>btn.addEventListener('click', enterPackCatExcludeMode));
   }
 }
 function enterPackCatExcludeMode(){
@@ -1657,13 +1774,12 @@ function cancelPackCatExcludeMode(){
   renderPackCatManageList(t);
   renderPackSubManageList(t);
 }
-async function savePackCatExcludeMode(){
+function savePackCatExcludeMode(){
   const t = getTrip(packCatManageCtx.tripId);
   t.packing.forEach(c=>{
     c.excluded = stagedExcludedCats.has(c.id);
     (c.templates||[]).forEach(tpl=>{ tpl.excluded = stagedExcludedTemplates.has(tpl.id); });
   });
-  await saveTrips();
   packCatExcludeMode = false;
   stagedExcludedCats = null;
   stagedExcludedTemplates = null;
@@ -1720,7 +1836,7 @@ function renderPackCatManageList(t){
     inp.addEventListener('click', (e)=> e.stopPropagation());
     inp.addEventListener('change', async ()=>{
       const cat = t.packing.find(c=>c.id===inp.dataset.catRename);
-      if(cat && inp.value.trim()){ cat.name = inp.value.trim(); await saveTrips(); }
+      if(cat && inp.value.trim()){ cat.name = inp.value.trim(); }
     });
   });
   container.querySelectorAll('[data-cat-del]').forEach(btn=>{
@@ -1729,7 +1845,6 @@ function renderPackCatManageList(t){
       if(t.packing.length<=1){ showToast('至少要保留一個分類'); return; }
       const wasSelected = packCatManageCtx.selectedCatId===btn.dataset.catDel;
       t.packing = t.packing.filter(c=>c.id!==btn.dataset.catDel);
-      await saveTrips();
       if(wasSelected) packCatManageCtx.selectedCatId = t.packing.length ? t.packing[0].id : null;
       renderPackCatManageList(t);
       renderPackSubManageList(t);
@@ -1771,13 +1886,12 @@ function renderPackSubManageList(t){
   container.querySelectorAll('[data-sub-rename]').forEach(inp=>{
     inp.addEventListener('change', async ()=>{
       const tpl = cat.templates.find(x=>x.id===inp.dataset.subRename);
-      if(tpl && inp.value.trim()){ tpl.name = inp.value.trim(); await saveTrips(); }
+      if(tpl && inp.value.trim()){ tpl.name = inp.value.trim(); }
     });
   });
   container.querySelectorAll('[data-sub-del]').forEach(btn=>{
     btn.addEventListener('click', async ()=>{
       cat.templates = cat.templates.filter(x=>x.id!==btn.dataset.subDel);
-      await saveTrips();
       renderPackCatManageList(t);
       renderPackSubManageList(t);
     });
@@ -1803,6 +1917,10 @@ function closePackCatManageModal(){
   stagedExcludedTemplates = null;
   renderTripList();
 }
+async function saveAndClosePackCatManageModal(){
+  await saveTrips();
+  closePackCatManageModal();
+}
 async function addPackCatFromManage(){
   if(!packCatManageCtx || packCatExcludeMode) return;
   const t = getTrip(packCatManageCtx.tripId);
@@ -1811,7 +1929,6 @@ async function addPackCatFromManage(){
   if(!name) return;
   const cat = {id:genId(), name, items:[], templates:[]};
   t.packing.push(cat);
-  await saveTrips();
   input.value = '';
   packCatManageCtx.selectedCatId = cat.id;
   renderPackCatManageList(t);
@@ -1827,7 +1944,6 @@ async function addPackSubFromManage(){
   if(!name) return;
   if(!cat.templates) cat.templates = [];
   cat.templates.push({id:genId(), name});
-  await saveTrips();
   nameInput.value = '';
   renderPackCatManageList(t);
   renderPackSubManageList(t);
@@ -1835,11 +1951,24 @@ async function addPackSubFromManage(){
 
 /* ---------- pack item edit ---------- */
 let packAddItemCtx = null; // {tripId, staged: []}
-function refreshPackAddItemSub(t){
+function refreshPackAddItemSub(t, preserveSelection){
   const catSel = document.getElementById('packAddItemCat');
   const subSel = document.getElementById('packAddItemSub');
+  const personSel = document.getElementById('packAddItemPerson');
   const cat = t.packing.find(c=>c.id===catSel.value);
-  subSel.innerHTML = subSelectOptionsHtml(cat, null);
+  const person = personSel ? personSel.value : null;
+  const currentText = preserveSelection ? subSel.value : null;
+  let excludeNames = [];
+  if(cat && person && person!=='__all__'){
+    excludeNames = cat.items.filter(i=>i.owner===person).map(i=>i.text);
+  }
+  if(packAddItemCtx){
+    const stagedNames = packAddItemCtx.staged
+      .filter(s=> s.catId===catSel.value && (s.person===person || s.person==='__all__' || person==='__all__'))
+      .map(s=>s.text);
+    excludeNames = excludeNames.concat(stagedNames);
+  }
+  subSel.innerHTML = subSelectOptionsHtml(cat, currentText, excludeNames);
 }
 function ownerWithAllOptionsHtml(owners, selected){
   return owners.map(p=>'<option value="'+escapeHtml(p)+'"'+(p===selected?' selected':'')+'>'+escapeHtml(p)+'</option>').join('') +
@@ -1852,7 +1981,8 @@ function renderPackAddItemStagedList(t){
     container.innerHTML = '<div class="empty-note">還沒有加入任何項目</div>';
     return;
   }
-  const owners = (t.participants && t.participants.length) ? t.participants : peopleList();
+  const owners = (packAddItemCtx && packAddItemCtx.personOptions) ? packAddItemCtx.personOptions
+    : ((t.participants && t.participants.length) ? t.participants : peopleList());
   container.innerHTML = staged.map(s=>{
     const cat = t.packing.find(c=>c.id===s.catId);
     return '<div class="pack-manage-row" data-staged-row="'+s.id+'">' +
@@ -1896,16 +2026,19 @@ function renderPackAddItemStagedList(t){
     btn.addEventListener('click', ()=>{
       packAddItemCtx.staged = packAddItemCtx.staged.filter(x=>x.id!==btn.dataset.stagedDel);
       renderPackAddItemStagedList(t);
+      refreshPackAddItemSub(t);
     });
   });
 }
-function openPackAddItemModal(t){
-  packAddItemCtx = {tripId: t.id, staged: []};
+function openPackAddItemModal(t, defaultPerson){
   const owners = (t.participants && t.participants.length) ? t.participants : peopleList();
+  const restrictToPerson = (defaultPerson && owners.includes(defaultPerson)) ? defaultPerson : null;
+  const personOptions = restrictToPerson ? [restrictToPerson] : owners;
+  packAddItemCtx = {tripId: t.id, staged: [], personOptions};
   document.getElementById('packAddItemCat').innerHTML = catSelectOptionsHtml(t.packing, t.packing[0] ? t.packing[0].id : null);
-  refreshPackAddItemSub(t);
   document.getElementById('packAddItemQty').innerHTML = qtyOptionsHtml(1);
-  document.getElementById('packAddItemPerson').innerHTML = ownerWithAllOptionsHtml(owners, owners[0]);
+  document.getElementById('packAddItemPerson').innerHTML = ownerWithAllOptionsHtml(personOptions, restrictToPerson || personOptions[0]);
+  refreshPackAddItemSub(t);
   renderPackAddItemStagedList(t);
   document.getElementById('packAddItemModalOverlay').classList.add('active');
 }
@@ -1927,31 +2060,99 @@ function stagePackAddItem(){
     qty: Number(qtySel.value)||1, person: personSel.value
   });
   renderPackAddItemStagedList(t);
+  refreshPackAddItemSub(t);
+}
+function buildPackAddPlan(t, staged){
+  const owners = (t.participants && t.participants.length) ? t.participants : peopleList();
+  const plan = [];
+  staged.forEach(s=>{
+    const targets = s.person==='__all__' ? owners : [s.person];
+    targets.forEach(person=>{
+      plan.push({ stagedId:s.id, catId:s.catId, text:s.text, qty:s.qty, person });
+    });
+  });
+  return plan;
+}
+async function commitPackAddPlan(plan, skipKeys){
+  skipKeys = skipKeys || new Set();
+  const t = getTrip(packAddItemCtx.tripId);
+  plan.forEach(p=>{
+    if(skipKeys.has(p.stagedId+'::'+p.person)) return;
+    const cat = t.packing.find(c=>c.id===p.catId);
+    if(!cat) return;
+    cat.items.push({id:genId(), text:p.text, owner:p.person, checked:false, qty:p.qty});
+  });
+  await saveTrips();
+  closePackAddItemModal();
+  closePackDupConfirmModal();
+  renderTripList();
 }
 async function savePackAddItemStaged(){
   if(!packAddItemCtx || !packAddItemCtx.staged.length){ showToast('清單是空的'); return; }
   const t = getTrip(packAddItemCtx.tripId);
-  const owners = (t.participants && t.participants.length) ? t.participants : peopleList();
-  packAddItemCtx.staged.forEach(s=>{
-    const cat = t.packing.find(c=>c.id===s.catId);
+  const plan = buildPackAddPlan(t, packAddItemCtx.staged);
+  const conflicts = [];
+  plan.forEach(p=>{
+    const cat = t.packing.find(c=>c.id===p.catId);
     if(!cat) return;
-    const targets = s.person==='__all__' ? owners : [s.person];
-    targets.forEach(person=>{
-      cat.items.push({id:genId(), text:s.text, owner:person, checked:false, qty:s.qty});
+    const others = cat.items.filter(i=>i.owner && i.owner!==p.person && i.text===p.text);
+    const otherOwners = [...new Set(others.map(i=>i.owner))];
+    if(otherOwners.length){
+      conflicts.push({ key:p.stagedId+'::'+p.person, text:p.text, person:p.person, otherOwners });
+    }
+  });
+  if(conflicts.length){
+    openPackDupConfirmModal(plan, conflicts);
+    return;
+  }
+  await commitPackAddPlan(plan);
+}
+let pendingPackPlan = null;
+function openPackDupConfirmModal(plan, conflicts){
+  pendingPackPlan = { plan, choices:{} };
+  conflicts.forEach(c=>{ pendingPackPlan.choices[c.key] = true; });
+  pendingPackPlan.conflicts = conflicts;
+  renderPackDupConfirmList();
+  document.getElementById('packDupConfirmModalOverlay').classList.add('active');
+}
+function closePackDupConfirmModal(){
+  const overlay = document.getElementById('packDupConfirmModalOverlay');
+  if(overlay) overlay.classList.remove('active');
+  pendingPackPlan = null;
+}
+function renderPackDupConfirmList(){
+  const container = document.getElementById('packDupConfirmList');
+  if(!pendingPackPlan) return;
+  container.innerHTML = pendingPackPlan.conflicts.map(c=>{
+    const checked = pendingPackPlan.choices[c.key];
+    return '<div class="pack-dup-row">' +
+      '<div class="pack-dup-text">'+escapeHtml(c.otherOwners.join('、'))+'已經攜帶了「'+escapeHtml(c.text)+'」，是否仍要新增到 '+escapeHtml(c.person)+' 的行李清單？</div>' +
+      '<label class="pack-dup-toggle"><input type="checkbox" data-dup-check="'+escapeHtml(c.key)+'"'+(checked?' checked':'')+'> 仍要新增</label>' +
+    '</div>';
+  }).join('');
+  container.querySelectorAll('[data-dup-check]').forEach(chk=>{
+    chk.addEventListener('change', ()=>{
+      pendingPackPlan.choices[chk.dataset.dupCheck] = chk.checked;
     });
   });
-  await saveTrips();
-  closePackAddItemModal();
-  renderTripList();
+}
+async function confirmPackDupAndSave(){
+  if(!pendingPackPlan) return;
+  const skipKeys = new Set(Object.keys(pendingPackPlan.choices).filter(k=>!pendingPackPlan.choices[k]));
+  await commitPackAddPlan(pendingPackPlan.plan, skipKeys);
 }
 let packPersonManageCtx = null; // {tripId, person}
 function catSelectOptionsHtml(cats, selectedId){
   return cats.filter(c=>!c.excluded || c.id===selectedId)
     .map(c=>'<option value="'+c.id+'"'+(c.id===selectedId?' selected':'')+'>'+escapeHtml(c.name)+(c.excluded?'（不攜帶）':'')+'</option>').join('');
 }
-function subSelectOptionsHtml(cat, currentText){
+function subSelectOptionsHtml(cat, currentText, excludeNames){
+  excludeNames = excludeNames || [];
   const allTemplates = (cat && cat.templates) || [];
-  const templates = allTemplates.filter(tpl=>!tpl.excluded || tpl.name===currentText);
+  const templates = allTemplates.filter(tpl=>
+    (!tpl.excluded || tpl.name===currentText) &&
+    (tpl.name===currentText || !excludeNames.includes(tpl.name))
+  );
   let html = '';
   if(currentText && !templates.some(tpl=>tpl.name===currentText)){
     html += '<option value="'+escapeHtml(currentText)+'" selected>'+escapeHtml(currentText)+'</option>';
@@ -2286,10 +2487,17 @@ function bindPanelEvents(t, panel){
   });
   const btnEditPackCat = el.querySelector('#btnEditPackCat');
   if(btnEditPackCat) btnEditPackCat.addEventListener('click', ()=> openPackCatManageModal(t));
-  const btnPackAddItemTop = el.querySelector('#btnPackAddItemTop');
-  if(btnPackAddItemTop) btnPackAddItemTop.addEventListener('click', ()=> openPackAddItemModal(t));
   el.querySelectorAll('[data-manage-person]').forEach(btn=>{
-    btn.addEventListener('click', ()=> openPackPersonManageModal(t, btn.dataset.managePerson));
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); openPackPersonManageModal(t, btn.dataset.managePerson); });
+  });
+  el.querySelectorAll('[data-add-person-item]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); openPackAddItemModal(t, btn.dataset.addPersonItem); });
+  });
+  el.querySelectorAll('[data-toggle-person]').forEach(head=>{
+    head.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-add-person-item],[data-manage-person]')) return;
+      togglePackExpanded(t.id, head.dataset.togglePerson);
+    });
   });
 
   // ledger
@@ -2324,7 +2532,10 @@ function bindPanelEvents(t, panel){
   el.querySelectorAll('[data-toggle-todo]').forEach(chk=>{
     chk.addEventListener('click', async ()=>{
       const it = t.todos.find(i=>i.id===chk.dataset.toggleTodo);
-      if(it) it.checked = !it.checked;
+      if(!it) return;
+      it.checked = !it.checked;
+      chk.classList.toggle('checked', it.checked);
+      chk.textContent = it.checked ? '✓' : '';
       await saveTrips();
       renderTripList();
     });
@@ -2831,9 +3042,9 @@ function wireEvents(){
   document.getElementById('airlineManageAddBtn').addEventListener('click', addAirlineFromManage);
   document.getElementById('airlineManageNewInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addAirlineFromManage(); });
 
-  document.getElementById('packCatManageModalClose').addEventListener('click', closePackCatManageModal);
-  document.getElementById('packCatManageDoneBtn').addEventListener('click', closePackCatManageModal);
-  bindOverlayDismiss('packCatManageModalOverlay', closePackCatManageModal);
+  document.getElementById('packCatManageModalClose').addEventListener('click', saveAndClosePackCatManageModal);
+  document.querySelectorAll('.packCatManageDoneBtn').forEach(btn=>btn.addEventListener('click', saveAndClosePackCatManageModal));
+  bindOverlayDismiss('packCatManageModalOverlay', saveAndClosePackCatManageModal);
   document.getElementById('packCatManageAddBtn').addEventListener('click', addPackCatFromManage);
   document.getElementById('packCatManageNewInput').addEventListener('keydown', (e)=>{ if(e.key==='Enter') addPackCatFromManage(); });
   document.getElementById('packSubManageAddBtn').addEventListener('click', addPackSubFromManage);
@@ -2850,10 +3061,17 @@ function wireEvents(){
   document.getElementById('packAddItemModalClose').addEventListener('click', closePackAddItemModal);
   document.getElementById('packAddItemCancel').addEventListener('click', closePackAddItemModal);
   bindOverlayDismiss('packAddItemModalOverlay', closePackAddItemModal);
+  document.getElementById('packDupConfirmClose').addEventListener('click', closePackDupConfirmModal);
+  document.getElementById('packDupConfirmCancel').addEventListener('click', closePackDupConfirmModal);
+  document.getElementById('packDupConfirmOkBtn').addEventListener('click', confirmPackDupAndSave);
+  bindOverlayDismiss('packDupConfirmModalOverlay', closePackDupConfirmModal);
   document.getElementById('packAddItemStageBtn').addEventListener('click', stagePackAddItem);
   document.getElementById('packAddItemSaveBtn').addEventListener('click', savePackAddItemStaged);
   document.getElementById('packAddItemCat').addEventListener('change', ()=>{
     if(packAddItemCtx) refreshPackAddItemSub(getTrip(packAddItemCtx.tripId));
+  });
+  document.getElementById('packAddItemPerson').addEventListener('change', ()=>{
+    if(packAddItemCtx) refreshPackAddItemSub(getTrip(packAddItemCtx.tripId), true);
   });
   document.getElementById('flightAddSeatBtn').addEventListener('click', ()=>{
     const t = flightModalCtx ? getTrip(flightModalCtx.tripId) : null;
@@ -2942,14 +3160,169 @@ async function init(){
   document.getElementById('loadingScreen').style.display = 'none';
 }
 
-setTimeout(()=>{
-  const loadingScreen = document.getElementById('loadingScreen');
-  if(loadingScreen && loadingScreen.style.display !== 'none'){
-    loadingScreen.querySelector('.spinner').insertAdjacentHTML('afterend','<div style="font-size:11px;color:var(--text-faint);font-family:var(--mono);">載入時間有點長，可能是網路不穩，試試看重新整理頁面</div>');
-  }
-}, 12000);
+function armSlowLoadHint(){
+  setTimeout(()=>{
+    const loadingScreen = document.getElementById('loadingScreen');
+    if(loadingScreen && loadingScreen.style.display !== 'none'){
+      loadingScreen.querySelector('.spinner').insertAdjacentHTML('afterend','<div style="font-size:11px;color:var(--text-faint);font-family:var(--mono);">載入時間有點長，可能是網路不穩，試試看重新整理頁面</div>');
+    }
+  }, 12000);
+}
 
-init();
+/* ---------------- Google Drive storage (shared) ----------------
+   Everyone who opens this app signs in with their own Google account, but
+   they all read/write the SAME Drive file (found by name). Share that file
+   with each other's Google account (normal Drive "Share" dialog, Editor
+   access) so co-editing actually works.
+   TODO Josh: fill in your OAuth Client ID from Google Cloud Console. You
+   can reuse the same OAuth client you made for Strength Ledger — just add
+   this app's URL as an extra "Authorized redirect URI" on it (the
+   "Authorized JavaScript origin" is already covered if it's the same
+   github.io account). Also add the broader Drive scope below to that
+   OAuth client's configured scopes, and add anyone who needs to sign in
+   (including Fiona) as a test user. */
+const GOOGLE_CLIENT_ID = "239888779674-h2m814mnnc19k0jgc0f50uv4ac1j8oli.apps.googleusercontent.com";
+const DRIVE_FILE_NAME = "haolvban-shared-data.json";
+const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive";
+const REDIRECT_URI = window.location.origin + window.location.pathname;
+
+let driveAccessToken = null;
+let driveFileId = null;
+let driveStoreCache = {};
+
+async function driveApiFetch(url, options){
+  options = options || {};
+  options.headers = Object.assign({}, options.headers, { "Authorization": "Bearer " + driveAccessToken });
+  const res = await fetch(url, options);
+  if(res.status === 401){ throw new Error("Google 登入已過期，請重新登入一次"); }
+  if(!res.ok && res.status !== 404){ throw new Error("雲端硬碟連線失敗（" + res.status + "）"); }
+  return res;
+}
+
+async function driveFindFileId(){
+  const q = encodeURIComponent("name='" + DRIVE_FILE_NAME + "' and trashed=false");
+  const res = await driveApiFetch("https://www.googleapis.com/drive/v3/files?q=" + q + "&fields=files(id,name)&spaces=drive");
+  const data = await res.json();
+  if(data.files && data.files.length){ return data.files[0].id; }
+  return null;
+}
+
+async function driveCreateFile(){
+  const res = await driveApiFetch("https://www.googleapis.com/drive/v3/files", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: DRIVE_FILE_NAME, mimeType: "application/json" })
+  });
+  const data = await res.json();
+  return data.id;
+}
+
+async function driveReadFile(fileId){
+  const res = await driveApiFetch("https://www.googleapis.com/drive/v3/files/" + fileId + "?alt=media");
+  const text = await res.text();
+  if(!text){ return {}; }
+  try{ return JSON.parse(text); }catch(e){ return {}; }
+}
+
+async function driveGetModifiedTime(fileId){
+  const res = await driveApiFetch("https://www.googleapis.com/drive/v3/files/" + fileId + "?fields=modifiedTime");
+  const data = await res.json();
+  return data.modifiedTime || null;
+}
+
+async function driveWriteFile(fileId, obj){
+  const res = await driveApiFetch("https://www.googleapis.com/upload/drive/v3/files/" + fileId + "?uploadType=media&fields=modifiedTime", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(obj)
+  });
+  const data = await res.json();
+  return data.modifiedTime || null;
+}
+
+let driveKnownModifiedTime = null;
+
+async function driveSaveAll(){
+  if(!driveFileId) return null;
+
+  // Conflict check: has someone else saved since we last read/wrote this file?
+  try{
+    const remoteModified = await driveGetModifiedTime(driveFileId);
+    if(driveKnownModifiedTime && remoteModified && remoteModified !== driveKnownModifiedTime){
+      const proceed = confirm(
+        "偵測到雲端上的資料被別人（或其他裝置）更新過，跟你現在看到的不一樣。\n\n" +
+        "按「確定」會用你目前畫面上的內容覆蓋掉雲端的最新版本；\n" +
+        "按「取消」則先不存檔，建議重新整理頁面拿到最新內容後再繼續。"
+      );
+      if(!proceed){
+        showToast('已取消儲存，建議重新整理頁面');
+        return false;
+      }
+    }
+  }catch(e){
+    // if the conflict check itself fails (e.g. offline), fall through and
+    // still try to save rather than blocking the user entirely
+  }
+
+  const newModifiedTime = await driveWriteFile(driveFileId, driveStoreCache);
+  driveKnownModifiedTime = newModifiedTime;
+  return true;
+}
+
+async function initDriveAndApp(){
+  const signinScreenEl = document.getElementById("signinScreen");
+  const googleBtn = document.getElementById("googleSigninBtn");
+  const loadingEl = document.getElementById("signinLoading");
+  const errEl = document.getElementById("signinError");
+  if(googleBtn) googleBtn.style.display = "none";
+  if(loadingEl) loadingEl.style.display = "block";
+  if(errEl) errEl.style.display = "none";
+  try{
+    driveFileId = await driveFindFileId();
+    if(!driveFileId){ driveFileId = await driveCreateFile(); }
+    driveStoreCache = await driveReadFile(driveFileId);
+    driveKnownModifiedTime = await driveGetModifiedTime(driveFileId);
+
+    if(signinScreenEl) signinScreenEl.style.display = "none";
+    const loadingScreen = document.getElementById("loadingScreen");
+    if(loadingScreen) loadingScreen.style.display = "flex";
+    armSlowLoadHint();
+    await init();
+  }catch(err){
+    if(loadingEl) loadingEl.style.display = "none";
+    if(googleBtn) googleBtn.style.display = "block";
+    if(errEl){
+      errEl.style.display = "block";
+      errEl.textContent = err && err.message ? err.message : "連線失敗，請再試一次";
+    }
+  }
+}
+
+function startGoogleSignin(){
+  const authUrl = "https://accounts.google.com/o/oauth2/v2/auth"
+    + "?client_id=" + encodeURIComponent(GOOGLE_CLIENT_ID)
+    + "&redirect_uri=" + encodeURIComponent(REDIRECT_URI)
+    + "&response_type=token"
+    + "&scope=" + encodeURIComponent(DRIVE_SCOPE)
+    + "&include_granted_scopes=true"
+    + "&prompt=select_account";
+  window.location.href = authUrl;
+}
+
+document.getElementById("googleSigninBtn").addEventListener("click", startGoogleSignin);
+
+// If we just came back from Google's redirect, the access token is in the URL fragment.
+(function checkAuthRedirect(){
+  const hash = window.location.hash || "";
+  if(hash.indexOf("access_token=") === -1) return;
+  const params = new URLSearchParams(hash.substring(1));
+  const token = params.get("access_token");
+  const error = params.get("error");
+  history.replaceState(null, "", window.location.pathname + window.location.search);
+  if(error || !token) return;
+  driveAccessToken = token;
+  initDriveAndApp();
+})();
 })();
 </script>
 </body>
