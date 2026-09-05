@@ -111,7 +111,6 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .trip-list{display:flex;flex-direction:column;gap:10px;}
 .trip-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;transition:border-color .15s;position:relative;}
 .trip-card:hover{border-color:var(--border-strong);}
-.trip-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--tc,var(--gold));border-radius:var(--radius) 0 0 var(--radius);}
 .trip-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
 .trip-card-headline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;min-width:0;}
 .trip-card-name{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--text);}
@@ -165,6 +164,12 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 /* ---------- overview tab ---------- */
 .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
 @media(max-width:760px){.stat-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:600px){
+  #app{padding:0 8px 80px;}
+  .trip-card{padding:12px 10px;}
+  .trip-card-panel{padding:12px 8px;}
+  .topbar-inner{padding:14px 10px;}
+}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;}
 .stat-label{font-size:11px;color:var(--text-faint);font-family:var(--mono);letter-spacing:0.5px;margin-bottom:6px;}
 .stat-val{font-size:20px;font-weight:700;font-family:var(--mono);color:var(--text);}
@@ -1266,7 +1271,10 @@ function renderHomeTodos(){
   el.querySelectorAll('[data-toggle-home-todo]').forEach(chk=>{
     chk.addEventListener('click', async ()=>{
       const it = state.homeTodos.find(x=>x.id===chk.dataset.toggleHomeTodo);
-      if(it) it.checked = !it.checked;
+      if(!it) return;
+      it.checked = !it.checked;
+      chk.classList.toggle('checked', it.checked);
+      chk.textContent = it.checked ? '✓' : '';
       await Store.setHomeTodos(state.homeTodos);
       renderHomeTodos();
     });
@@ -2519,7 +2527,10 @@ function bindPanelEvents(t, panel){
   el.querySelectorAll('[data-toggle-todo]').forEach(chk=>{
     chk.addEventListener('click', async ()=>{
       const it = t.todos.find(i=>i.id===chk.dataset.toggleTodo);
-      if(it) it.checked = !it.checked;
+      if(!it) return;
+      it.checked = !it.checked;
+      chk.classList.toggle('checked', it.checked);
+      chk.textContent = it.checked ? '✓' : '';
       await saveTrips();
       renderTripList();
     });
