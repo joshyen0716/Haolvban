@@ -313,7 +313,8 @@ input,textarea,select{font-family:inherit;color:var(--text);background-color:var
 .pack-person-head.clickable{cursor:pointer;}
 .pack-collapse-arrow{font-size:11px;color:var(--text-faint);width:12px;flex-shrink:0;}
 .pack-person-head-fill{flex:1 1 auto;}
-.pack-person-add{width:auto;padding:6px 10px;font-size:14px;line-height:1;}
+.pack-person-add{width:auto;padding:6px 12px;font-size:12px;line-height:1;background:rgba(212,162,76,0.16);border-color:rgba(212,162,76,0.4);color:var(--gold);font-weight:600;}
+.pack-person-add:hover{background:rgba(212,162,76,0.26);}
 .pack-person-edit{width:auto;padding:6px 12px;gap:4px;font-size:12px;}
 .pack-person-name{font-family:var(--serif);font-size:14.5px;font-weight:600;color:var(--text);}
 .pack-person-count{font-size:11px;color:var(--text-faint);font-family:var(--mono);}
@@ -1662,7 +1663,7 @@ function packPersonColHtml(t, person, items, isReadonly, scopeKey, expanded, col
     '<span class="pack-person-count">'+done+'/'+items.length+'</span>' +
     '<span class="pack-person-head-fill"></span>';
   if(!isReadonly){
-    html += '<button class="btn-icon btn-sm pack-person-add" data-add-person-item="'+escapeHtml(scopeKey)+'" title="新增項目">＋</button>';
+    html += '<button class="btn-icon btn-sm pack-person-add" data-add-person-item="'+escapeHtml(scopeKey)+'" title="新增項目">新增</button>';
   }
   if(!isReadonly && (!collapsible || expanded)){
     html += '<button class="btn-icon btn-sm pack-person-edit" data-manage-person="'+escapeHtml(scopeKey)+'">✎ 編輯</button>';
@@ -1950,12 +1951,13 @@ async function addPackSubFromManage(){
 
 /* ---------- pack item edit ---------- */
 let packAddItemCtx = null; // {tripId, staged: []}
-function refreshPackAddItemSub(t){
+function refreshPackAddItemSub(t, preserveSelection){
   const catSel = document.getElementById('packAddItemCat');
   const subSel = document.getElementById('packAddItemSub');
   const personSel = document.getElementById('packAddItemPerson');
   const cat = t.packing.find(c=>c.id===catSel.value);
   const person = personSel ? personSel.value : null;
+  const currentText = preserveSelection ? subSel.value : null;
   let excludeNames = [];
   if(cat && person && person!=='__all__'){
     excludeNames = cat.items.filter(i=>i.owner===person).map(i=>i.text);
@@ -1966,7 +1968,7 @@ function refreshPackAddItemSub(t){
       .map(s=>s.text);
     excludeNames = excludeNames.concat(stagedNames);
   }
-  subSel.innerHTML = subSelectOptionsHtml(cat, null, excludeNames);
+  subSel.innerHTML = subSelectOptionsHtml(cat, currentText, excludeNames);
 }
 function ownerWithAllOptionsHtml(owners, selected){
   return owners.map(p=>'<option value="'+escapeHtml(p)+'"'+(p===selected?' selected':'')+'>'+escapeHtml(p)+'</option>').join('') +
@@ -1979,7 +1981,8 @@ function renderPackAddItemStagedList(t){
     container.innerHTML = '<div class="empty-note">還沒有加入任何項目</div>';
     return;
   }
-  const owners = (t.participants && t.participants.length) ? t.participants : peopleList();
+  const owners = (packAddItemCtx && packAddItemCtx.personOptions) ? packAddItemCtx.personOptions
+    : ((t.participants && t.participants.length) ? t.participants : peopleList());
   container.innerHTML = staged.map(s=>{
     const cat = t.packing.find(c=>c.id===s.catId);
     return '<div class="pack-manage-row" data-staged-row="'+s.id+'">' +
@@ -2028,12 +2031,14 @@ function renderPackAddItemStagedList(t){
   });
 }
 function openPackAddItemModal(t, defaultPerson){
-  packAddItemCtx = {tripId: t.id, staged: []};
   const owners = (t.participants && t.participants.length) ? t.participants : peopleList();
+  const restrictToPerson = (defaultPerson && owners.includes(defaultPerson)) ? defaultPerson : null;
+  const personOptions = restrictToPerson ? [restrictToPerson] : owners;
+  packAddItemCtx = {tripId: t.id, staged: [], personOptions};
   document.getElementById('packAddItemCat').innerHTML = catSelectOptionsHtml(t.packing, t.packing[0] ? t.packing[0].id : null);
-  refreshPackAddItemSub(t);
   document.getElementById('packAddItemQty').innerHTML = qtyOptionsHtml(1);
-  document.getElementById('packAddItemPerson').innerHTML = ownerWithAllOptionsHtml(owners, defaultPerson || owners[0]);
+  document.getElementById('packAddItemPerson').innerHTML = ownerWithAllOptionsHtml(personOptions, restrictToPerson || personOptions[0]);
+  refreshPackAddItemSub(t);
   renderPackAddItemStagedList(t);
   document.getElementById('packAddItemModalOverlay').classList.add('active');
 }
@@ -3066,7 +3071,7 @@ function wireEvents(){
     if(packAddItemCtx) refreshPackAddItemSub(getTrip(packAddItemCtx.tripId));
   });
   document.getElementById('packAddItemPerson').addEventListener('change', ()=>{
-    if(packAddItemCtx) refreshPackAddItemSub(getTrip(packAddItemCtx.tripId));
+    if(packAddItemCtx) refreshPackAddItemSub(getTrip(packAddItemCtx.tripId), true);
   });
   document.getElementById('flightAddSeatBtn').addEventListener('click', ()=>{
     const t = flightModalCtx ? getTrip(flightModalCtx.tripId) : null;
