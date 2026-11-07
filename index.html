@@ -1147,6 +1147,14 @@ function bindOverviewCalendarEvents(t, el){
     });
   });
 }
+function todayLocalISO(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function isPastTrip(t){
+  const end = t.endDate || t.startDate;
+  return !!end && end < todayLocalISO();
+}
 function isShortTrip(t){
   if(!t.startDate || !t.endDate) return false;
   const days = daysBetween(t.startDate, t.endDate).length;
@@ -1196,9 +1204,10 @@ function renderTripList(){
     container.innerHTML = '<div class="trip-empty">還沒有旅遊計畫，點上面「✈ 新增旅遊計畫」開始規劃吧</div>';
     return;
   }
+  // newest (latest start date) first, oldest last
   const sorted = state.trips.slice().sort((a,b)=>{
     const da=a.startDate||'9999', db=b.startDate||'9999';
-    return da<db?-1:(da>db?1:0);
+    return da<db?1:(da>db?-1:0);
   });
   container.innerHTML = sorted.map(tripCardHtml).join('');
 
@@ -3156,9 +3165,11 @@ async function init(){
     await saveTrips();
   }
   refreshHomeTodoAssigneeOptions();
-  // default expand/collapse: trips shorter than a month auto-expand their overview
+  // default expand/collapse: past trips stay collapsed; upcoming/ongoing trips
+  // shorter than a month auto-expand their overview
   state.trips.forEach(t=>{
-    if(isShortTrip(t) && !(t.id in expandedTab)) expandedTab[t.id] = 'overview';
+    if(t.id in expandedTab) return;
+    expandedTab[t.id] = (!isPastTrip(t) && isShortTrip(t)) ? 'overview' : null;
   });
   renderApp();
   document.getElementById('loadingScreen').style.display = 'none';
