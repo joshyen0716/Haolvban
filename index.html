@@ -1405,6 +1405,25 @@ async function addTripParticipant(){
   renderTripParticipantsRow();
   refreshHomeTodoAssigneeOptions();
 }
+/* Copy the category + template (小項目) structure from another trip, without items. */
+function packingTemplateCount(t){
+  return (t.packing||[]).reduce((n,c)=>n+((c.templates||[]).length),0);
+}
+function bestPackingSource(excludeId){
+  let best = null, bestN = 0;
+  state.trips.forEach(t=>{
+    if(t.id===excludeId) return;
+    const n = packingTemplateCount(t);
+    if(n>bestN){ best = t; bestN = n; }
+  });
+  return best;
+}
+function clonePackingStructure(src){
+  return (src.packing||[]).map(c=>({
+    id: genId(), name: c.name, items: [],
+    templates: (c.templates||[]).map(tpl=>({id:genId(), name:tpl.name}))
+  }));
+}
 async function saveTripModal(){
   const name = document.getElementById('tripNameInput').value.trim();
   if(!name){ showToast('請輸入計畫名稱'); return; }
@@ -1417,7 +1436,10 @@ async function saveTripModal(){
     state.trips.push({
       id: genId(), name, startDate:start, endDate:end, color,
       itinerary: [], flights: {outbound:[], return:[], domestic:[]},
-      packing: PACK_CATS_DEFAULT.map(c=>({id:genId(), name:c, items:[], templates:[]})),
+      packing: (function(){
+        const src = bestPackingSource(null);
+        return src ? clonePackingStructure(src) : PACK_CATS_DEFAULT.map(c=>({id:genId(), name:c, items:[], templates:[]}));
+      })(),
       ledger: [], todos: [], participants
     });
     showToast('已建立「'+name+'」');
@@ -3165,6 +3187,20 @@ async function init(){
     await saveTrips();
   }
   refreshHomeTodoAssigneeOptions();
+  // one-time: untouched trips (no items, no templates) inherit the category/template
+  // structure from the trip that has the most templates
+  let packSeedChanged = false;
+  state.trips.forEach(t=>{
+    if(t._packSeeded) return;
+    t._packSeeded = true;
+    packSeedChanged = true;
+    const untouched = (t.packing||[]).every(c=>!(c.items||[]).length && !(c.templates||[]).length);
+    if(untouched){
+      const src = bestPackingSource(t.id);
+      if(src) t.packing = clonePackingStructure(src);
+    }
+  });
+  if(packSeedChanged) await saveTrips();
   // default expand/collapse: past trips stay collapsed; upcoming/ongoing trips
   // shorter than a month auto-expand their overview
   state.trips.forEach(t=>{
