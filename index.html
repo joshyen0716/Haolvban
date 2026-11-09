@@ -847,6 +847,10 @@ const Store = {
     try{ driveStoreCache.trips = JSON.stringify(v); await driveSaveAll(); return true; }
     catch(e){ return null; }
   },
+  getPackMaster(){
+    try{ return driveStoreCache.packMaster ? JSON.parse(driveStoreCache.packMaster) : null; }
+    catch(e){ return null; }
+  },
   async getHomeTodos(){
     try{ return driveStoreCache.homeTodos ? JSON.parse(driveStoreCache.homeTodos) : []; }
     catch(e){ return []; }
@@ -1418,11 +1422,70 @@ function bestPackingSource(excludeId){
   });
   return best;
 }
-function clonePackingStructure(src){
+function buildMasterFromTrip(src){
   return (src.packing||[]).map(c=>({
-    id: genId(), name: c.name, items: [],
+    id: genId(), name: c.name,
     templates: (c.templates||[]).map(tpl=>({id:genId(), name:tpl.name}))
   }));
+}
+/* Master (公版) category/template list shared by every trip. Each trip's
+   categories/templates link to it via masterId; items and 不攜帶 flags stay per trip. */
+function syncTripWithMaster(t){
+  const master = state.packMaster || [];
+  t.packing = t.packing || [];
+  const masterIds = new Set(master.map(m=>m.id));
+  master.forEach(m=>{
+    let c = t.packing.find(x=>x.masterId===m.id);
+    if(!c){
+      c = t.packing.find(x=>!x.masterId && !x.local && x.name===m.name);
+      if(c){ c.masterId = m.id; }
+      else { c = {id:genId(), masterId:m.id, name:m.name, items:[], templates:[]}; t.packing.push(c); }
+    }
+    c.name = m.name;
+    c.items = c.items || [];
+    c.templates = c.templates || [];
+    const keep = [];
+    m.templates.forEach(mt=>{
+      let tp = c.templates.find(x=>x.masterId===mt.id) || c.templates.find(x=>!x.masterId && x.name===mt.name);
+      if(!tp){ tp = {id:genId(), name:mt.name}; }
+      tp.masterId = mt.id; tp.name = mt.name;
+      keep.push(tp);
+    });
+    c.templates = keep.concat(c.templates.filter(x=>!x.masterId && keep.indexOf(x)===-1));
+  });
+  t.packing = t.packing.filter(c=>{
+    if(c.masterId && !masterIds.has(c.masterId)){
+      if((c.items||[]).length){ delete c.masterId; c.local = true; return true; }
+      return false;
+    }
+    return true;
+  });
+  const idx = id=>master.findIndex(m=>m.id===id);
+  const linked = t.packing.filter(c=>c.masterId).sort((a,b)=>idx(a.masterId)-idx(b.masterId));
+  const others = t.packing.filter(c=>!c.masterId);
+  t.packing = linked.concat(others);
+}
+function syncAllTripsWithMaster(){ state.trips.forEach(syncTripWithMaster); }
+function pushTripToMaster(t){
+  const old = state.packMaster || [];
+  const next = [];
+  (t.packing||[]).forEach(c=>{
+    if(c.local) return;
+    let m = c.masterId && old.find(x=>x.id===c.masterId);
+    if(!m){ m = {id:genId(), name:c.name, templates:[]}; c.masterId = m.id; }
+    const tpls = [];
+    (c.templates||[]).forEach(tp=>{
+      let mt = tp.masterId && (m.templates||[]).find(x=>x.id===tp.masterId);
+      if(!mt){ mt = {id:genId(), name:tp.name}; tp.masterId = mt.id; }
+      tpls.push({id:mt.id, name:tp.name});
+    });
+    next.push({id:m.id, name:c.name, templates:tpls});
+  });
+  state.packMaster = next;
+}
+async function savePackMasterAndTrips(){
+  driveStoreCache.packMaster = JSON.stringify(state.packMaster || []);
+  await saveTrips();
 }
 async function saveTripModal(){
   const name = document.getElementById('tripNameInput').value.trim();
@@ -1436,12 +1499,10 @@ async function saveTripModal(){
     state.trips.push({
       id: genId(), name, startDate:start, endDate:end, color,
       itinerary: [], flights: {outbound:[], return:[], domestic:[]},
-      packing: (function(){
-        const src = bestPackingSource(null);
-        return src ? clonePackingStructure(src) : PACK_CATS_DEFAULT.map(c=>({id:genId(), name:c, items:[], templates:[]}));
-      })(),
+      packing: [],
       ledger: [], todos: [], participants
     });
+    syncTripWithMaster(state.trips[state.trips.length-1]);
     showToast('已建立「'+name+'」');
   } else {
     const t = getTrip(tripModalCtx.id);
@@ -1929,6 +1990,7 @@ function renderPackSubManageList(t){
   });
 }
 function openPackCatManageModal(t){
+  syncTripWithMaster(t);
   packCatManageCtx = {tripId: t.id, selectedCatId: t.packing.length ? t.packing[0].id : null};
   packCatExcludeMode = false;
   stagedExcludedCats = null;
@@ -1949,7 +2011,14 @@ function closePackCatManageModal(){
   renderTripList();
 }
 async function saveAndClosePackCatManageModal(){
-  await saveTrips();
+  const t = packCatManageCtx ? getTrip(packCatManageCtx.tripId) : null;
+  if(t){
+    pushTripToMaster(t);
+    syncAllTripsWithMaster();
+    await savePackMasterAndTrips();
+  } else {
+    await saveTrips();
+  }
   closePackCatManageModal();
 }
 async function addPackCatFromManage(){
@@ -1982,6 +2051,35 @@ async function addPackSubFromManage(){
 
 /* ---------- pack item edit ---------- */
 let packAddItemCtx = null; // {tripId, staged: []}
+function packExcludeNames(t, cat, person){
+  let ex = [];
+  if(cat && person && person!=='__all__'){
+    ex = cat.items.filter(i=>i.owner===person).map(i=>i.text);
+  }
+  if(cat && packAddItemCtx){
+    ex = ex.concat(packAddItemCtx.staged
+      .filter(s=> s.catId===cat.id && (s.person===person || s.person==='__all__' || person==='__all__'))
+      .map(s=>s.text));
+  }
+  return ex;
+}
+function refreshPackAddItemCat(t){
+  const catSel = document.getElementById('packAddItemCat');
+  const personSel = document.getElementById('packAddItemPerson');
+  const person = personSel ? personSel.value : null;
+  const prev = catSel.value;
+  const avail = t.packing.filter(c=>{
+    if(c.excluded) return false;
+    const ex = packExcludeNames(t, c, person);
+    return (c.templates||[]).some(tp=>!tp.excluded && !ex.includes(tp.name));
+  });
+  if(!avail.length){
+    catSel.innerHTML = '<option value="">（沒有可新增的項目）</option>';
+    return;
+  }
+  const selId = avail.some(c=>c.id===prev) ? prev : avail[0].id;
+  catSel.innerHTML = avail.map(c=>'<option value="'+c.id+'"'+(c.id===selId?' selected':'')+'>'+escapeHtml(c.name)+'</option>').join('');
+}
 function refreshPackAddItemSub(t, preserveSelection){
   const catSel = document.getElementById('packAddItemCat');
   const subSel = document.getElementById('packAddItemSub');
@@ -2057,6 +2155,7 @@ function renderPackAddItemStagedList(t){
     btn.addEventListener('click', ()=>{
       packAddItemCtx.staged = packAddItemCtx.staged.filter(x=>x.id!==btn.dataset.stagedDel);
       renderPackAddItemStagedList(t);
+      refreshPackAddItemCat(t);
       refreshPackAddItemSub(t);
     });
   });
@@ -2066,9 +2165,10 @@ function openPackAddItemModal(t, defaultPerson){
   const restrictToPerson = (defaultPerson && owners.includes(defaultPerson)) ? defaultPerson : null;
   const personOptions = restrictToPerson ? [restrictToPerson] : owners;
   packAddItemCtx = {tripId: t.id, staged: [], personOptions};
-  document.getElementById('packAddItemCat').innerHTML = catSelectOptionsHtml(t.packing, t.packing[0] ? t.packing[0].id : null);
   document.getElementById('packAddItemQty').innerHTML = qtyOptionsHtml(1);
   document.getElementById('packAddItemPerson').innerHTML = ownerWithAllOptionsHtml(personOptions, restrictToPerson || personOptions[0]);
+  document.getElementById('packAddItemCat').innerHTML = '';
+  refreshPackAddItemCat(t);
   refreshPackAddItemSub(t);
   renderPackAddItemStagedList(t);
   document.getElementById('packAddItemModalOverlay').classList.add('active');
@@ -2091,6 +2191,7 @@ function stagePackAddItem(){
     qty: Number(qtySel.value)||1, person: personSel.value
   });
   renderPackAddItemStagedList(t);
+  refreshPackAddItemCat(t);
   refreshPackAddItemSub(t);
 }
 function buildPackAddPlan(t, staged){
@@ -2962,7 +3063,7 @@ async function deleteExpenseModal(){
 
 /* ================= BACKUP ================= */
 function exportBackup(){
-  const backup = {app:'好旅伴', exportedAt:new Date().toISOString(), trips: state.trips, homeTodos: state.homeTodos, people: state.people};
+  const backup = {app:'好旅伴', exportedAt:new Date().toISOString(), trips: state.trips, homeTodos: state.homeTodos, people: state.people, packMaster: state.packMaster};
   const json = JSON.stringify(backup, null, 2);
   const blob = new Blob([json], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -3106,7 +3207,11 @@ function wireEvents(){
     if(packAddItemCtx) refreshPackAddItemSub(getTrip(packAddItemCtx.tripId));
   });
   document.getElementById('packAddItemPerson').addEventListener('change', ()=>{
-    if(packAddItemCtx) refreshPackAddItemSub(getTrip(packAddItemCtx.tripId), true);
+    if(packAddItemCtx){
+      const tt = getTrip(packAddItemCtx.tripId);
+      refreshPackAddItemCat(tt);
+      refreshPackAddItemSub(tt, true);
+    }
   });
   document.getElementById('flightAddSeatBtn').addEventListener('click', ()=>{
     const t = flightModalCtx ? getTrip(flightModalCtx.tripId) : null;
@@ -3187,20 +3292,20 @@ async function init(){
     await saveTrips();
   }
   refreshHomeTodoAssigneeOptions();
-  // one-time: untouched trips (no items, no templates) inherit the category/template
-  // structure from the trip that has the most templates
-  let packSeedChanged = false;
-  state.trips.forEach(t=>{
-    if(t._packSeeded) return;
-    t._packSeeded = true;
-    packSeedChanged = true;
-    const untouched = (t.packing||[]).every(c=>!(c.items||[]).length && !(c.templates||[]).length);
-    if(untouched){
-      const src = bestPackingSource(t.id);
-      if(src) t.packing = clonePackingStructure(src);
-    }
-  });
-  if(packSeedChanged) await saveTrips();
+  // master (公版) category/template list: bootstrap once from the trip with the most
+  // templates, then keep every trip linked to it
+  state.packMaster = Store.getPackMaster();
+  let masterBootstrapped = false;
+  if(!state.packMaster){
+    const src = bestPackingSource(null);
+    state.packMaster = src ? buildMasterFromTrip(src)
+      : PACK_CATS_DEFAULT.map(n=>({id:genId(), name:n, templates:[]}));
+    driveStoreCache.packMaster = JSON.stringify(state.packMaster);
+    masterBootstrapped = true;
+  }
+  const beforeSync = JSON.stringify(state.trips);
+  syncAllTripsWithMaster();
+  if(masterBootstrapped || JSON.stringify(state.trips) !== beforeSync) await saveTrips();
   // default expand/collapse: past trips stay collapsed; upcoming/ongoing trips
   // shorter than a month auto-expand their overview
   state.trips.forEach(t=>{
